@@ -22,6 +22,9 @@ import org.apache.flink.streaming.api.watermark.Watermark;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+// https://ci.apache.org/projects/flink/flink-docs-master/api/java/org/apache/flink/streaming/api/functions/source/SourceFunction.html
 public class MockTokenSource implements SourceFunction<APIToken> {
     private static final Logger LOG = LoggerFactory.getLogger(MockTokenSource.class);
 
@@ -30,6 +33,7 @@ public class MockTokenSource implements SourceFunction<APIToken> {
     private static final Long DEFAULT_TOKEN_DURATION = 10000L;
 
     private transient Faker _faker;
+    private volatile boolean isRunning = true;
 
     public MockTokenSource() {
         initIfNecessary();
@@ -40,7 +44,7 @@ public class MockTokenSource implements SourceFunction<APIToken> {
         Long lastTokenGenTime = System.currentTimeMillis();
         APIToken apiToken = getNextToken();
 
-        while(true) {
+        while(isRunning) {
             Long currTime = System.currentTimeMillis();
 
             if((currTime - lastTokenGenTime) > 10000L) {
@@ -61,6 +65,7 @@ public class MockTokenSource implements SourceFunction<APIToken> {
 
     @Override
     public void cancel() {
+        this.isRunning = false;
     }
 
     private void initIfNecessary() {

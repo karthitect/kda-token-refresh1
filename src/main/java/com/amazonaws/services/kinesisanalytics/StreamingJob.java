@@ -46,7 +46,8 @@ public class StreamingJob {
 									   ParameterTool parameter) throws Exception {
 
 		// token source (sparse; meant for broadcast)
-		DataStream<APIToken> apiTokens = env.addSource(new MockTokenSource());
+		// explicitly set parallelism to 1
+		DataStream<APIToken> apiTokens = env.addSource(new MockTokenSource()).setParallelism(1);
 
 		// data source (primary stream)
 		KeyedStream<EmployeeInfo, Tuple> empStreamByCompany = env.addSource(new RandEmployeeInfoSource())
