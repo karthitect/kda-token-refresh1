@@ -35,13 +35,15 @@ public class RandEmployeeInfoSource implements SourceFunction<EmployeeInfo> {
     private transient Faker _faker;
     private transient SimpleDateFormat _sdfr;
 
+    private volatile boolean isRunning = true;
+
     public RandEmployeeInfoSource() {
         initIfNecessary();
     }
 
     @Override
     public void run(SourceContext<EmployeeInfo> sourceContext) throws Exception {
-        while(true) {
+        while(isRunning) {
             EmployeeInfo ei = getNextEmployee();
 
             sourceContext.collectWithTimestamp(ei, ei.getEventtimestamp());
@@ -56,6 +58,7 @@ public class RandEmployeeInfoSource implements SourceFunction<EmployeeInfo> {
 
     @Override
     public void cancel() {
+        this.isRunning = false;
     }
 
     private void initIfNecessary() {
